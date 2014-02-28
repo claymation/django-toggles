@@ -25,42 +25,42 @@ Usage
 
 * Install the library:
 
-    pip install django-toggles
+        pip install django-toggles
 
 * Add "toggles" to `INSTALLED_APPS`
 
 * Subclass ToggleView (or AuthenticatedToggleView):
 
-    from toggles.views import ToggleView
+        from toggles.views import ToggleView
 
-    class MyToggleView(ToggleView):
-        def put(self, request):
-            """Set the toggle"""
-            something.you.want.to.update = True
+        class MyToggleView(ToggleView):
+            def put(self, request):
+                """Set the toggle"""
+                something.you.want.to.update = True
 
-        def delete(self, request):
-            """Clear the toggle"""
-            something.you.want.to.update = False
+            def delete(self, request):
+                """Clear the toggle"""
+                something.you.want.to.update = False
 
 * Wire up your ToggleView `URLconf`
 
-    from django.conf.urls import patterns, include, url
+        from django.conf.urls import patterns, include, url
     
-    urlpatterns = patterns('',
-        ...
-        url(r'^rest/api/for/thing/to/toggle/$',
-            MyToggle.as_view(),
-            name="my_toggle"),
-        ...
-    )
+        urlpatterns = patterns('',
+            ...
+            url(r'^rest/api/for/thing/to/toggle/$',
+                MyToggle.as_view(),
+                name="my_toggle"),
+            ...
+        )
 
 * Render the toggle button in your templates:
 
-    {% load toggles %}
-    {% toggles_js %}
-    ...
-    {% url "my_toggle" as toggle_url %}
-    {% toggle active=object.toggled url=toggle_url on="On" off="Off" %}
+        {% load toggles %}
+        {% toggles_js %}
+        ...
+        {% url "my_toggle" as toggle_url %}
+        {% toggle active=object.toggled url=toggle_url on="On" off="Off" %}
 
 * That's it! Users visiting that page will see a button that reflects the current state of the toggle,
   and can click the button to dynamically change its state.
@@ -73,48 +73,48 @@ Examples
 
 * Subclass AuthenticatedToggleView (to ensure request.user is present):
 
-    from toggles.views import ToggleView
+        from toggles.views import ToggleView
 
-    class LikeToggleView(AuthenticatedToggleView):
-        def put(self, request, object_pk):
-            """
-            Handle requests to like an object.
-            """
-            try:
-                request.user.liked_objects.add(object_pk)
-            except IntegrityError:
-                return HttpResponseBadRequest()
-            return HttpResponse()
+        class LikeToggleView(AuthenticatedToggleView):
+            def put(self, request, object_pk):
+                """
+                Handle requests to like an object.
+                """
+                try:
+                    request.user.liked_objects.add(object_pk)
+                except IntegrityError:
+                    return HttpResponseBadRequest()
+                return HttpResponse()
 
-        def delete(self, request, object_pk):
-            """
-            Handle requests to unlike an object.
-            """
-            try:
-                request.user.liked_objects.remove(object_pk)
-            except IntegrityError:
-                return HttpResponseBadRequest()
-            return HttpResponse()
+            def delete(self, request, object_pk):
+                """
+                Handle requests to unlike an object.
+                """
+                try:
+                    request.user.liked_objects.remove(object_pk)
+                except IntegrityError:
+                    return HttpResponseBadRequest()
+                return HttpResponse()
 
 * Wire up your LikeToggleView `URLconf`
 
-    from django.conf.urls import patterns, include, url
+        from django.conf.urls import patterns, include, url
     
-    urlpatterns = patterns('',
-        ...
-        url(r'users/self/objects/liked/(?P<object_pk>[\d]+)/$',
-            LikeToggleView.as_view(),
-            name="user_objects_liked"),
-        ...
-    )
+        urlpatterns = patterns('',
+            ...
+            url(r'users/self/objects/liked/(?P<object_pk>[\d]+)/$',
+                LikeToggleView.as_view(),
+                name="user_objects_liked"),
+            ...
+        )
 
 * Render the Like button in your templates:
 
-    {% load toggles %}
-    {% toggles_js %}
-    ...
-    {% url "user_objects_liked" object.pk as toggle_url %}
-    {% toggle active=object.liked url=toggle_url on="You like this" off="Like" %}
+        {% load toggles %}
+        {% toggles_js %}
+        ...
+        {% url "user_objects_liked" object.pk as toggle_url %}
+        {% toggle active=object.liked url=toggle_url on="You like this" off="Like" %}
 
 * That's it! Users can now like content objects dynamically by clicking the Like button on the page.
 
@@ -122,11 +122,11 @@ Note: In this example, we have a M2M relationship between User and the objects t
 To avoid doing N+1 database queries in a list view (to determine if the user has already liked each object),
 we set a `.liked` attribute on each object in one query with something like:
 
-    liked_objects = []
-    user = self.request.user
-    if user.is_authenticated():
-        liked_objects = frozenset(user.liked_objects.values_list('pk', flat=True))
-    for obj in all_objects_to_be_displayed_on_this_page:
-        obj.liked = obj.pk in liked_objects
+        liked_objects = []
+        user = self.request.user
+        if user.is_authenticated():
+            liked_objects = frozenset(user.liked_objects.values_list('pk', flat=True))
+        for obj in all_objects_to_be_displayed_on_this_page:
+            obj.liked = obj.pk in liked_objects
 
 If you're using class-based views, a good place to do this kind of thing is in `get_context_data`.
