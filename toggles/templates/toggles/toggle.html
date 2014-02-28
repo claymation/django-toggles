@@ -1,0 +1,10 @@
+{% spaceless %}
+<button {% if btnid %}id="{{ btnid }}"{% endif %}
+        type="button"
+        class="{{ btncls }} django-toggle"
+        data-active="{{ active }}"
+        data-url="{{ url }}"
+        data-loading-text="{{ loading }}"
+        data-on-text="{{ on }}"
+        data-off-text="{{ off }}">{{ label }}</button>
+{% endspaceless %}
